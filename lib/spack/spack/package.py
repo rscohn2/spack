@@ -15,12 +15,15 @@ import collections
 import contextlib
 import copy
 import functools
+import glob
 import hashlib
 import inspect
 import os
 import re
 import shutil
+import string
 import sys
+import tempfile
 import textwrap
 import time
 import traceback
@@ -53,7 +56,7 @@ from ordereddict_backport import OrderedDict
 from spack.filesystem_view import YamlFilesystemView
 from spack.installer import PackageInstaller, InstallError
 from spack.install_test import TestFailure, TestSuite
-from spack.util.executable import which, ProcessError
+from spack.util.executable import which, ProcessError, Executable
 from spack.util.prefix import Prefix
 from spack.stage import stage_prefix, Stage, ResourceStage, StageComposite
 from spack.util.package_hash import package_hash
@@ -2740,3 +2743,51 @@ class DependencyConflictError(spack.error.SpackError):
         super(DependencyConflictError, self).__init__(
             "%s conflicts with another file in the flattened directory." % (
                 conflict))
+
+class IntelOneApiPackage(Package):
+    '''Base class for Intel oneAPI packages.'''
+
+    homepage = 'https://software.intel.com/oneapi'
+
+    # GitHub accounts to notify when the package is updated.
+    maintainers = ['rscohn2']
+
+    phases = ['install']
+
+    def file(self, product, version, release):
+        file_t = 'l_${product}_oneapi_p_${version}.${build}_offline.sh'
+        return string.Template(file_t).substitute(
+            product=product,
+            version=version,
+            build=release['build'])
+
+    def url(self, product, version, release):
+        url_t = 'https://registrationcenter-download.intel.com/akdlm/irc_nas/${irc_id}/${file}'
+        return string.Template(url_t).substitute(
+            irc_id=release['irc_id'],
+            file=self.file(product, version, release))
+
+    def oneapi_install(self, spec, prefix, product, oneapi_packages, release):
+        print('spec:', spec,'prefix:',prefix)
+        bash = Executable('bash')
+
+        # Capture logs written in /tmp
+        tmpdir = tempfile.mkdtemp(prefix='spack-intel-')
+        bash.add_default_env('TMPDIR', tmpdir)
+
+        # Need to set HOME to avoid using ~/intel
+        bash.add_default_env('HOME', prefix)
+
+        version = spec.versions.lowest()
+        bash('./%s' % self.file(product, version, release),
+             '-s', '-a', '-s', '--action', 'install',
+             '--eula', 'accept',
+             '--components',
+             oneapi_packages,
+             '--install-dir', prefix)
+
+        # preserve config and logs
+        dst = os.path.join(self.prefix, '.spack')
+        for f in glob.glob('%s/intel*log' % tmpdir):
+            install(f, dst)
+        
