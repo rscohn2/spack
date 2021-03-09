@@ -39,7 +39,7 @@ class IntelOneapiCompilers(IntelOneApiPackage):
                 expand=False)
         resource(name='fortran-installer',
                  url='https://registrationcenter-download.intel.com/akdlm/irc_nas/17511/m_fortran-compiler-classic_p_2021.1.2.87_offline.dmg',
-                 sha256='29345145268d08a59fa7eb6e58c7522768466dd98f6d9754540d1a0803596829',
+                 sha256='06ccc11ad545f5f819585e05178dda700cf262956887e7d5a39fb52ebd7eb036',
                  expand=False,
                  placement='fortran-installer',
                  when='@2021.1.2')
