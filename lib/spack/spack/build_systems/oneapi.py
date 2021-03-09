@@ -39,9 +39,9 @@ class IntelOneApiPackage(Package):
             vol = '/Volumes/{}'.format(splitext(installer_path)[0])
             Executable('hdiutil')('attach', installer_path)
             bootstrapper = '{}/bootstrapper.app/Contents/MacOS/bootstrapper'.format(vol)
-            installer = Executable(bootstrapper)
+            installer = Executable('sudo')
             installer.add_default_env('HOME', prefix)
-            installer('-s', '--action', 'install', '--eula=accept', '--continue-with-optional-error=yes', '--log-dir=.')
+            installer(bootstrapper, '-s', '--action', 'install', '--eula=accept', '--continue-with-optional-error=yes', '--log-dir=.')
             Executable('hdiutil')('detach', vol, '-quiet')
 
         if platform == 'linux':
