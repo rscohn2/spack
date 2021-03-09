@@ -8,7 +8,7 @@
 """
 
 from sys import platform
-from os.path import basename, dirname, isdir, join
+from os.path import basename, dirname, isdir, join, splitext
 
 from spack.package import Package
 from spack.util.environment import EnvironmentModifications
@@ -36,12 +36,13 @@ class IntelOneApiPackage(Package):
             installer_path = basename(self.url_for_version(spec.version))
 
         if platform == 'darwin':
+            vol = '/Volumes/{}'.format(splitext(installer_path)[0])
             Executable('hdiutil')('attach', installer_path)
-            bootstrapper = '/Volumes/{}/bootstrapper.app/Contents/MacOS/bootstrapper'.format(basename(installer_path))
+            bootstrapper = '{}/bootstrapper.app/Contents/MacOS/bootstrapper'.format(vol)
             installer = Executable(bootstrapper)
             installer.add_default_env('HOME', prefix)
             installer('-s', '--action', 'install', '--eula=accept', '--continue-with-optional-error=yes', '--log-dir=.')
-            Executable('hdiutil')('detach', bootstrapper, '-quiet')
+            Executable('hdiutil')('detach', vol, '-quiet')
 
         if platform == 'linux':
             bash = Executable('bash')
