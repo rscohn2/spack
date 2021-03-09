@@ -24,7 +24,7 @@ class IntelOneapiDal(IntelOneApiLibraryPackage):
 
     if platform == 'darwin':
         version('2021.1.1',
-                sha256='6e0e24bba462e80f0fba5a46e95cf0cca6cf17948a7753f8e396ddedd637544e',
+                sha256='c77bd1d9bacff1d72651a7e01b06e15cced85487110b3aace36df6fd7ced2b09',
                 url='https://registrationcenter-download.intel.com/akdlm/irc_nas/17411/m_daal_oneapi_p_2021.1.1.69_offline.dmg',
                 expand=False)
 

@@ -17,7 +17,7 @@ class IntelOneapiIpp(IntelOneApiLibraryPackage):
 
     if platform == 'darwin':
         version('2021.1.1',
-                sha256='2656a3a7f1f9f1438cbdf98fd472a213c452754ef9476dd65190a7d46618ba86',
+                sha256='8db8132bc4e442b6c3c1591ac3e5a006168b9f3b3969cdafbdcbcad2c546a2ef',
                 url='https://registrationcenter-download.intel.com/akdlm/irc_nas/17419/m_ipp_oneapi_p_2021.1.1.45_offline.dmg',
                 expand=False)
 

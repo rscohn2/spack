@@ -24,7 +24,7 @@ class IntelOneapiMkl(IntelOneApiLibraryPackage):
 
     if platform == 'darwin':
         version('2021.1.1',
-                sha256='818b6bd9a6c116f4578cda3151da0612ec9c3ce8b2c8a64730d625ce5b13cc0c',
+                sha256='2e31d4e64488da0fc84230f22241931370fb96822a9bfc8bf1079dd15a99032b',
                 url='https://registrationcenter-download.intel.com/akdlm/irc_nas/17408/m_onemkl_p_2021.1.1.50_offline.dmg',
                 expand=False)
 

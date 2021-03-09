@@ -18,7 +18,7 @@ class IntelOneapiTbb(IntelOneApiLibraryPackage):
 
     if platform == 'darwin':
         version('2021.1.1',
-                sha256='2656a3a7f1f9f1438cbdf98fd472a213c452754ef9476dd65190a7d46618ba86',
+                sha256='15a703eb8093ff070e17e4191ccec132c1bcd4f72963204c0f10adcfe68aa17d',
                 url='https://registrationcenter-download.intel.com/akdlm/irc_nas/17409/m_tbb_oneapi_p_2021.1.1.110_offline.dmg',
                 expand=False)
 
