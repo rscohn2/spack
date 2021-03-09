@@ -34,7 +34,7 @@ class IntelOneapiCompilers(IntelOneApiPackage):
 
     if platform == 'darwin':
         version('2021.1.2',
-                sha256='68d6cb638091990e578e358131c859f3bbbbfbf975c581fd0b4b4d36476d6f0a',
+                sha256='fb964952ee09acb3c1566e039776983d40cb838179d63438e26538e916300e1c',
                 url='https://registrationcenter-download.intel.com/akdlm/irc_nas/17510/m_cpp-compiler-classic_p_2021.1.2.66_offline.dmg',
                 expand=False)
         resource(name='fortran-installer',
