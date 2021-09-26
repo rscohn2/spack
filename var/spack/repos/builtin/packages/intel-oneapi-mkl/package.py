@@ -32,11 +32,16 @@ class IntelOneapiMkl(IntelOneApiLibraryPackage):
 
     variant('ilp64', default=False,
             description='Build with ILP64 support')
+    variant('cluster', default=False,
+            description='Build with cluster support: scalapak, blacs, etc')
 
     depends_on('intel-oneapi-tbb')
+    # cluster libraries need mpi
+    depends_on('mpi', when='scalapack')
+    depends_on('mpi', when='+cluster')
 
     provides('fftw-api@3')
-    provides('scalapack')
+    provides('scalapack', when='+cluster')
     provides('mkl')
     provides('lapack')
     provides('blas')
@@ -55,14 +60,22 @@ class IntelOneapiMkl(IntelOneApiLibraryPackage):
         include_path = join_path(self.component_path, 'include')
         return find_headers('*', include_path)
 
+    # provide cluster libraries if +cluster variant is used or
+    # the scalapack virtual package was requested
+    def cluster(self):
+        return '+cluster' in self.spec or 'scalpack' in self.spec
+
     @property
     def libs(self):
-        mkl_libs = [self.xlp64_lib('libmkl_scalapack_ilp64'),
-                    'libmkl_cdft_core',
-                    self.xlp64_lib('libmkl_intel'),
-                    'libmkl_sequential',
-                    'libmkl_core',
-                    self.xlp64_lib('libmkl_blacs_intelmpi')]
+        mkl_libs = []
+        if self.cluster():
+            mkl_libs += [self.xlp64_lib('libmkl_scalapack'),
+                         'libmkl_cdft_core']
+        mkl_libs += [self.xlp64_lib('libmkl_intel'),
+                     'libmkl_sequential',
+                     'libmkl_core']
+        if self.cluster():
+            mkl_libs += [self.xlp64_lib('libmkl_blacs_intelmpi')]
         libs = find_libraries(mkl_libs,
                               join_path(self.component_path, 'lib', 'intel64'))
         libs += find_system_libraries(['libpthread', 'libm', 'libdl'])
