@@ -57,7 +57,12 @@ class IntelOneapiMkl(IntelOneApiLibraryPackage):
 
     @property
     def libs(self):
-        mkl_libs = [self.xlp64_lib('libmkl_intel'), 'libmkl_sequential', 'libmkl_core']
+        mkl_libs = [self.xlp64_lib('libmkl_scalapack_ilp64'),
+                    'libmkl_cdft_core',
+                    self.xlp64_lib('libmkl_intel'),
+                    'libmkl_sequential',
+                    'libmkl_core',
+                    self.xlp64_lib('libmkl_blacs_intelmpi')]
         libs = find_libraries(mkl_libs,
                               join_path(self.component_path, 'lib', 'intel64'))
         libs += find_system_libraries(['libpthread', 'libm', 'libdl'])
