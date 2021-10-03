@@ -30,6 +30,7 @@ class IntelOneapiMkl(IntelOneApiLibraryPackage):
                 sha256='818b6bd9a6c116f4578cda3151da0612ec9c3ce8b2c8a64730d625ce5b13cc0c',
                 expand=False)
 
+    variant('shared', default=True, description='Builds shared library')
     variant('ilp64', default=False,
             description='Build with ILP64 support')
     variant('cluster', default=False,
@@ -67,6 +68,7 @@ class IntelOneapiMkl(IntelOneApiLibraryPackage):
 
     @property
     def libs(self):
+        shared = True if '+shared' in self.spec else False
         mkl_libs = []
         if self.cluster():
             mkl_libs += [self.xlp64_lib('libmkl_scalapack'),
@@ -77,6 +79,11 @@ class IntelOneapiMkl(IntelOneApiLibraryPackage):
         if self.cluster():
             mkl_libs += [self.xlp64_lib('libmkl_blacs_intelmpi')]
         libs = find_libraries(mkl_libs,
-                              join_path(self.component_path, 'lib', 'intel64'))
+                              join_path(self.component_path, 'lib', 'intel64'),
+                              shared=shared)
+        if not shared:
+            libs = LibraryList(['-Wl,--start-group'] + libs.libraries +
+                               ['-Wl,--end-group'])
+
         libs += find_system_libraries(['libpthread', 'libm', 'libdl'])
         return libs
