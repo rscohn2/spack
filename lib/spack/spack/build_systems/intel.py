@@ -998,12 +998,11 @@ class IntelPackage(PackageBase):
             # lib directory but in a directory of its own which should be
             # included in the rpath
             if self.version_yearlike >= ver('2019'):
-                # Patch libmpi.so rpath so it can find libfabric
                 d = ancestor(self.component_lib_dir('mpi'))
-                libfabric_rpath = [os.path.join(d, 'libfabric', 'lib')]
                 if '+external-libfabric' in self.spec:
-                    libfabric_rpath = self.spec['libfabric'].libs
-                result = libfabric_rpath + result
+                    result += self.spec['libfabric'].libs
+                else:
+                    result += find_libraries(['libfabric'], os.path.join(d, 'libfabric', 'lib'))
 
         if '^mpi' in self.spec.root and ('+mkl' in self.spec or
                                          self.provides('scalapack')):

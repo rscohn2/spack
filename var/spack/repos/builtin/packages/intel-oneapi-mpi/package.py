@@ -90,10 +90,10 @@ class IntelOneapiMpi(IntelOneApiLibraryPackage):
         libs += find_system_libraries(['libdl', 'librt', 'libpthread'])
 
         # Find libfabric for libmpi.so
-        libfabric_rpath = join_path(self.component_path, 'libfabric', 'lib')
         if '+external-libfabric' in self.spec:
-            libfabric_rpath = self.spec['libfabric'].libs
-        libs += libfabric_rpath
+            libs += self.spec['libfabric'].libs
+        else:
+            libs += find_libraries(['libfabric'], join_path(self.component_path, 'libfabric', 'lib'))
 
         return libs
 
