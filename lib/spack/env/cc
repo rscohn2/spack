@@ -797,6 +797,9 @@ if [ "$SPACK_DEBUG" = TRUE ]; then
     unset IFS
 fi
 
+echo input "[$mode] $command $input_command"
+echo output "[$mode] "$full_command_list
+
 # Execute the full command, preserving spaces with IFS set
 # to the alarm bell separator.
 IFS="$lsep"; exec $full_command_list
