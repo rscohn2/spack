@@ -159,6 +159,7 @@ class Wrf(Package):
 
     patch("patches/4.4/arch.postamble.patch", when="@4.4:")
     patch("patches/4.4/configure.patch", when="@4.4:")
+    patch("patches/4.4/ifx.patch", when="%oneapi")
     # Various syntax fixes found by FPT tool
     patch(
         "https://github.com/wrf-model/WRF/commit/6502d5d9c15f5f9a652dec244cc12434af737c3c.patch?full_index=1",
@@ -310,7 +311,7 @@ class Wrf(Package):
         # Remove broken default options...
         self.do_configure_fixup()
 
-        if self.spec.compiler.name not in ["intel", "gcc", "aocc", "fj"]:
+        if self.spec.compiler.name not in ["intel", "gcc", "aocc", "fj", "oneapi"]:
             raise InstallError(
                 "Compiler %s not currently supported for WRF build." % self.spec.compiler.name
             )
