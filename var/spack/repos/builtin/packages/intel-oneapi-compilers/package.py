@@ -182,6 +182,11 @@ class IntelOneapiCompilers(IntelOneApiPackage):
                 # should not be patched
                 patchelf(file, fail_on_error=False)
 
+    def write_config_file(self, flags, path):
+        with open(path, "w") as f:
+            f.write(" ".join(flags))
+        set_install_permissions(path)
+
     @run_after("install")
     def extend_config_flags(self):
         # Extends compiler config files to inject additional compiler flags.
@@ -196,7 +201,12 @@ class IntelOneapiCompilers(IntelOneApiPackage):
         # TODO: it is unclear whether we should really use all elements of
         #  _ld_library_path because it looks like the only rpath that needs to be
         #  injected is self.component_prefix.linux.compiler.lib.intel64_lin.
-        flags_list = ["-Wl,-rpath,{}".format(d) for d in self._ld_library_path()]
+        common_flags = ["-Wl,-rpath,{}".format(d) for d in self._ld_library_path()]
+
+        # Make sure that underlying clang gets the right GCC toolchain by default
+        llvm_flags = ["--gcc-toolchain={}".format(self.compiler.prefix)]
+        classic_flags = ["-gcc-name={}".format(self.compiler.cc)]
+        classic_flags.append("-gxx-name={}".format(self.compiler.cxx))
 
         # Older versions trigger -Wunused-command-line-argument warnings whenever
         # linker flags are passed in preprocessor (-E) or compilation mode (-c).
@@ -204,34 +214,25 @@ class IntelOneapiCompilers(IntelOneApiPackage):
         # do not trigger these warnings. In some build systems these warnings can
         # cause feature detection to fail, so we silence them with -Wno-unused-...
         if self.spec.version < Version("2022.1.0"):
-            flags_list.append("-Wno-unused-command-line-argument")
+            llvm_flags.append("-Wno-unused-command-line-argument")
 
-        def write_cfg(cmp_list, flags_list):
-            flags = " ".join(flags_list)
-            for cmp in cmp_list:
-                cfg_file = self.component_prefix.linux.bin.join(cmp + ".cfg")
-                with open(cfg_file, "w") as f:
-                    f.write(flags)
-                set_install_permissions(cfg_file)
-
-        # Make sure that icc gets the right GCC C+ support
-        write_cfg(
-            [
-                join_path("intel64", "icc"),
-            ],
-            flags_list + ["-gcc-name={}".format(self.compiler.cc)],
-        )
-        write_cfg(
-            [
-                join_path("intel64", "icpc"),
-            ],
-            flags_list + ["-gxx-name={}".format(self.compiler.cxx)],
-        )
-        # Make sure that underlying clang gets the right GCC toolchain by default
-        write_cfg(
-            ["icx", "icpx", "ifx"],
-            flags_list + ["--gcc-toolchain={}".format(self.compiler.prefix)],
-        )
+        for cmp in [
+            "icx",
+            "icpx",
+            "ifx",
+        ]:
+            self.write_config_file(
+                common_flags + llvm_flags, self.component_prefix.linux.bin.join(cmp + ".cfg")
+            )
+        for cmp in [
+            "icc",
+            "icpc",
+            "ifort",
+        ]:
+            self.write_config_file(
+                common_flags + classic_flags,
+                self.component_prefix.linux.bin.intel64.join(cmp + ".cfg"),
+            )
 
     def _ld_library_path(self):
         # Returns an iterable of directories that might contain shared runtime libraries
